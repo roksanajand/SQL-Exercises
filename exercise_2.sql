@@ -1,8 +1,7 @@
---CWL 4
---tworzenie schematu
+-- Creating schema
 -- CREATE SCHEMA ksiegowosc;
 
---tworzenie tabel
+-- Creating tables
 CREATE TABLE ksiegowosc.pracownicy
 (
 id_pracownika INT PRIMARY KEY,
@@ -11,7 +10,7 @@ nazwisko VARCHAR(50) NOT NULL,
 adres VARCHAR(100) NOT NULL,
 telefon VARCHAR(15) 
 );
-COMMENT ON TABLE ksiegowosc.pracownicy IS 'Tabela przechowująca informacje o pracownikach';
+COMMENT ON TABLE ksiegowosc.pracownicy IS 'Table storing employee information';
 
 
 CREATE TABLE ksiegowosc.godziny
@@ -21,7 +20,7 @@ data DATE NOT NULL,
 liczba_godzin DECIMAL(10,2) NOT NULL,
 id_pracownika INT NOT NULL
 );
-COMMENT ON TABLE ksiegowosc.godziny IS 'Tabela przechowująca informacje o godzinach';
+COMMENT ON TABLE ksiegowosc.godziny IS 'Table storing working hours information';
 
 
 CREATE TABLE ksiegowosc.pensje
@@ -30,7 +29,7 @@ id_pensji INT PRIMARY KEY,
  stanowisko VARCHAR(50) NOT NULL,
  kwota DECIMAL(10,2) NOT NULL
 );
-COMMENT ON TABLE ksiegowosc.pensje IS 'Tabela przechowująca informacje o pensjach';
+COMMENT ON TABLE ksiegowosc.pensje IS 'Table storing salary information';
 
 
 CREATE TABLE ksiegowosc.premie
@@ -39,7 +38,7 @@ CREATE TABLE ksiegowosc.premie
 	rodzaj VARCHAR(50) ,
 	kwota DECIMAL(10,2)
 );
-COMMENT ON TABLE ksiegowosc.premie IS 'Tabela przechowująca informacje o premiach pracownikow';
+COMMENT ON TABLE ksiegowosc.premie IS 'Table storing employee bonuses information';
 
 
 CREATE TABLE ksiegowosc.wynagrodzenie
@@ -53,7 +52,7 @@ id_premii INT
 COMMENT ON TABLE ksiegowosc.wynagrodzenie IS 'Tabela przechowująca informacje o wynagrodzeniach pracownikow';
 
 
--- dodanie kluczy obcych
+-- Adding foreign keys
  ALTER TABLE ksiegowosc.wynagrodzenie 
  ADD FOREIGN KEY (id_pracownika) 
  REFERENCES ksiegowosc.pracownicy(id_pracownika);
@@ -70,7 +69,7 @@ ALTER TABLE ksiegowosc.godziny
 ADD FOREIGN KEY (id_pracownika)
 REFERENCES ksiegowosc.pracownicy(id_pracownika);
 
---wypelnienie 10 rekordami tabel
+-- Inserting 10 records into tables
 INSERT INTO ksiegowosc.pracownicy(id_pracownika, imie, nazwisko,
 adres, telefon)
 VALUES
@@ -87,7 +86,7 @@ VALUES
 (11,'Jola','Makowej','ul.POlna','00000000');
 
 
--- Pracownik 1
+
 INSERT INTO ksiegowosc.godziny (id_godziny, data, liczba_godzin, id_pracownika)
 VALUES
 (1, '2023-11-01', 12, 1),
@@ -106,7 +105,7 @@ VALUES
 (14, '2023-11-14', 12, 1),
 (15, '2023-11-15', 12, 1);
 
--- Pracownik 2
+
 INSERT INTO ksiegowosc.godziny (id_godziny, data, liczba_godzin, id_pracownika)
 VALUES
 (16, '2023-11-01', 16, 2),
@@ -122,7 +121,7 @@ VALUES
 (26, '2023-11-11', 16, 2),
 (27, '2023-11-12', 16, 2);
 
--- Pracownik 3
+
 INSERT INTO ksiegowosc.godziny (id_godziny, data, liczba_godzin, id_pracownika)
 VALUES
 (28, '2023-11-01', 8, 3),
@@ -135,7 +134,7 @@ VALUES
 (35, '2023-11-08', 10, 3),
 (36, '2023-11-09', 8, 3);
 
---RESZTA PRACOWNIKOW
+
 INSERT INTO ksiegowosc.godziny (id_godziny, data, liczba_godzin, id_pracownika)
 VALUES
 (37, '2023-11-01', 8, 4),
@@ -197,20 +196,18 @@ VALUES
 
 
 
---a.wyswietlenie id_pracownika i nazwiska 
+-- Display employee ID and last name
 SELECT ksiegowosc.pracownicy.id_pracownika, ksiegowosc.pracownicy.nazwisko
 FROM ksiegowosc.pracownicy
 
---b.wyswietlenie id_pracowników ktorych płaca>1000
-SELECT ksiegowosc.pracownicy.id_pracownika--, ksiegowosc.pensje.kwota
-FROM ksiegowosc.pracownicy -- bierzemy ta tabele jako nasza główną
+-- Display employee IDs where salary > 1000
+SELECT ksiegowosc.pracownicy.id_pracownika
+FROM ksiegowosc.pracownicy
 JOIN ksiegowosc.wynagrodzenie ON ksiegowosc.pracownicy.id_pracownika = ksiegowosc.wynagrodzenie.id_pracownika
---Łączymy tabelę ksiegowosc.pracownicy z tabelą ksiegowosc.wynagrodzenie na podstawie identyfikatora pracownika (id_pracownika). To oznacza, że zapytanie uwzględnia tylko te wiersze,
---które mają pasujące identyfikatory pracownika w obu tabelach.
-JOIN ksiegowosc.pensje ON ksiegowosc.wynagrodzenie.id_pensji = ksiegowosc.pensje.id_pensji --kolejne połaczenie 2 tabel za pomoca identyfikatora id_pensji
+JOIN ksiegowosc.pensje ON ksiegowosc.wynagrodzenie.id_pensji = ksiegowosc.pensje.id_pensji
 WHERE ksiegowosc.pensje.kwota > 1000;
 
---DRUGI SPOSOB
+--second option
 SELECT id_pracownika
 FROM ksiegowosc.wynagrodzenie
 WHERE id_pensji IN ( --tworzymy wewnetrzne zapytanie 
@@ -220,46 +217,34 @@ WHERE id_pensji IN ( --tworzymy wewnetrzne zapytanie
 );
 
 
---c.wyswietlenie id_pracownikow nieposiadajych premi, ktorych placa>2000
-SELECT ksiegowosc.pracownicy.id_pracownika--, ksiegowosc.pensje.kwota --to bedziemy wyswietlac
-FROM ksiegowosc.pracownicy --glowna tabelka
+-- Display employees with no bonus and salary > 2000
+SELECT ksiegowosc.pracownicy.id_pracownika
+FROM ksiegowosc.pracownicy
 JOIN ksiegowosc.wynagrodzenie ON ksiegowosc.pracownicy.id_pracownika = ksiegowosc.wynagrodzenie.id_pracownika
--- polaczenie tabelki pracownicy z wynagrodzenie za pomoca klucza od_pracownicy
 JOIN ksiegowosc.pensje ON ksiegowosc.wynagrodzenie.id_pensji = ksiegowosc.pensje.id_pensji
---polaczenie tabelki wynagrodzenie z tabelka pensje za pomoca id_pensjii
 LEFT JOIN ksiegowosc.premie ON ksiegowosc.wynagrodzenie.id_premii = ksiegowosc.premie.id_premii
--- polaczenie tabelki premie i wynagrodzenie
---left join daje nam to ze bedzie wyswietlac wszytskie rekordy z tabelii wynagrodznie (z lewej strony )
--- nawet jesli nie ma odpowieadjacych rekordow w tabelii premie 
-WHERE ksiegowosc.pensje.kwota > 2000 AND COALESCE(ksiegowosc.premie.kwota,0) =0;
--- COALESCE Warunek ten sprawdza, czy kwota premii wynosi 0 lub jest NULL, co oznacza brak premii.
+WHERE ksiegowosc.pensje.kwota > 2000 AND COALESCE(ksiegowosc.premie.kwota,0) = 0;
 
-
--- d.wyswietlenie pracownikow ktorych pierwsza litera imienia zaczyna sie od J
+-- Display employees whose first name starts with 'J'
 SELECT *
 FROM ksiegowosc.pracownicy 
 WHERE imie LIKE 'J%';
 
---e. wyswietlenie pracownikow ktorych  nazwisko zawiera litere n a imie konczy sie na a
+-- Display employees whose last name contains 'n' and first name ends with 'a'
 SELECT *
 FROM ksiegowosc.pracownicy 
 WHERE imie LIKE '%a' AND nazwisko LIKE '%n%';
 
---f.wyswietl imie i nazwisko pracownikow, ich liczbe nadgodzin, jesli czas pracy przekroczyl 160h
+-- Display employees whose working hours exceeded 160h and calculate overtime
 SELECT ksiegowosc.pracownicy.imie,
 		ksiegowosc.pracownicy.nazwisko,
-		GREATEST((SUM(ksiegowosc.godziny.liczba_godzin)-160),0) AS il_nadgodziny 
-		--oblicza roznice sum godzin pracy  a 160 h , ale nie ponizej 0!
-		--jeśli różnica (SUM(liczba_godzin) - 160) jest mniejsza niż zero (czyli mniej niż 160 godzin pracy), to wartość końcowa to zero, co oznacza brak nadgodzin. 
-		--Jeśli różnica jest większa niż zero, to zostanie zwrócona właśnie ta różnica, co oznacza ilość nadgodzin.
-FROM ksiegowosc.pracownicy --glowna tabela
+		GREATEST((SUM(ksiegowosc.godziny.liczba_godzin)-160),0) AS overtime_hours
+FROM ksiegowosc.pracownicy
 INNER JOIN ksiegowosc.godziny ON ksiegowosc.pracownicy.id_pracownika=ksiegowosc.godziny.id_pracownika
---laczy tabele godziny z pracownicy za pomoca id_pracownika
-GROUP BY ksiegowosc.pracownicy.imie,ksiegowosc.pracownicy.nazwisko
---grupuje wg imie, nazwisko,id, dzieki temu bedzie mozliwe obliczenie nadgodzin dla kazdego pracownika
-HAVING (SUM(ksiegowosc.godziny.liczba_godzin)-160) >0; --warunek na to zeby wysietlało tylko nadgodziny
+GROUP BY ksiegowosc.pracownicy.imie, ksiegowosc.pracownicy.nazwisko
+HAVING (SUM(ksiegowosc.godziny.liczba_godzin)-160) >0;
 
----DRUGIE ROZWIAZANIE F
+---second option
 SELECT ksiegowosc.pracownicy.imie,
 		ksiegowosc.pracownicy.nazwisko
 FROM ksiegowosc.pracownicy 
@@ -270,128 +255,129 @@ GROUP BY ksiegowosc.godziny.id_pracownika
 HAVING (SUM(godziny.liczba_godzin) - 160) > 0 );
 
 
---g.wyswietl imie i nazwiskom pracownikow ktorych pensja jest <1500,3000>
+--Display employees whose salary is  <1500,3000>
 SELECT ksiegowosc.pracownicy.imie, ksiegowosc.pracownicy.nazwisko, ksiegowosc.pensje.kwota --, ksiegowosc.pracownicy.id_pracownika
-FROM ksiegowosc.pracownicy --glowna tabelka
+FROM ksiegowosc.pracownicy 
 JOIN ksiegowosc.wynagrodzenie ON ksiegowosc.pracownicy.id_pracownika = ksiegowosc.wynagrodzenie.id_pracownika
---polaczenie tabelki wynagrodzenie z pracownicy poprzez id_pracownika
 JOIN ksiegowosc.pensje ON ksiegowosc.wynagrodzenie.id_pensji = ksiegowosc.pensje.id_pensji
---polaczenie tabelki pensje z wynagrodzenie poprzez id_pensji
 WHERE ksiegowosc.pensje.kwota >= 1500 AND ksiegowosc.pensje.kwota <= 3000;
 
---h.wyswietl imie i nazwisko pracownikow ktorzy mieli nadgodziny ale nie dostali premii
+-- Display first name and last name of employees who worked overtime but did not receive a bonus
 SELECT
     ksiegowosc.pracownicy.imie,
     ksiegowosc.pracownicy.nazwisko
-FROM ksiegowosc.pracownicy --glowna tabelka
+FROM ksiegowosc.pracownicy -- main table
 JOIN ksiegowosc.godziny ON ksiegowosc.pracownicy.id_pracownika = ksiegowosc.godziny.id_pracownika
---polaczenie tabelki godziny z pracownicy poprzez id_pracownika
+-- joining the "godziny" (hours) table with "pracownicy" (employees) using id_pracownika
 JOIN ksiegowosc.wynagrodzenie ON ksiegowosc.godziny.id_pracownika = ksiegowosc.wynagrodzenie.id_pracownika
---polaczenie wynagrodzenia z godiznami, nawet pracownicy ktorzy nie maja wpisu w tabelii wynagrodzenie
---a selniaja warunki (nadgodziny)tez zostana uwzglednieni
+-- joining the "wynagrodzenie" (salary payments) table with "godziny" (hours)
+-- even employees who do not have records in the "wynagrodzenie" table
+-- but meet the overtime condition will be included
 JOIN ksiegowosc.premie ON ksiegowosc.wynagrodzenie.id_premii=ksiegowosc.premie.id_premii
---polaczenie tabelki premie z wynagrodzenie poprzez id_pracownika
+-- joining the "premie" (bonuses) table with "wynagrodzenie" using id_premii
 WHERE ksiegowosc.premie.kwota=0
 GROUP BY ksiegowosc.pracownicy.id_pracownika, ksiegowosc.pracownicy.imie, ksiegowosc.pracownicy.nazwisko
---grupuje wg imie,nazwisko,id_pracownika umożliwiajac obliczenia na godzianch pracy i kwocie premii
+-- grouping by first name, last name, and employee ID to allow calculations on working hours and bonus amount
 HAVING
     SUM(ksiegowosc.godziny.liczba_godzin) > 160;
--- -- HAVING filtruje wyniki i sprawdza czy suma godzin >160 
+-- HAVING filters results to only show employees who worked more than 160 hours
 
---DRUGI SPOSÓB
+-- SECOND METHOD
 SELECT p.imie, p.nazwisko
 FROM ksiegowosc.pracownicy p
-WHERE p.id_pracownika IN(
-SELECT id_pracownika 
-FROM ksiegowosc.godziny
-GROUP BY id_pracownika
-HAVING SUM(liczba_godzin)>160)
+WHERE p.id_pracownika IN (
+    SELECT id_pracownika 
+    FROM ksiegowosc.godziny
+    GROUP BY id_pracownika
+    HAVING SUM(liczba_godzin) > 160)
 AND 
-p.id_pracownika
-IN(
-SELECT id_pracownika
-FROM ksiegowosc.wynagrodzenie
-WHERE id_premii is NULL);
+p.id_pracownika IN (
+    SELECT id_pracownika
+    FROM ksiegowosc.wynagrodzenie
+    WHERE id_premii IS NULL);
 
-
---i.uszereguj pracownikow wg pensji --rosnąco??
-SELECT ksiegowosc.wynagrodzenie.id_pracownika, ksiegowosc.pensje.kwota --wybieramy id_pr z tabeli wynagrodzen oraz kwota z tabeli pensje
+-- Sort employees by salary (ascending)
+SELECT ksiegowosc.wynagrodzenie.id_pracownika, ksiegowosc.pensje.kwota
+-- selecting employee ID from the "wynagrodzenie" table and salary from the "pensje" table
 FROM ksiegowosc.wynagrodzenie , ksiegowosc.pensje 
-WHERE ksiegowosc.wynagrodzenie.id_pensji = ksiegowosc.pensje.id_pensji -- przyrownuje id_pensji z dwóch tabel aby połączyc te 2 tabele
-GROUP BY ksiegowosc.wynagrodzenie.id_pracownika, ksiegowosc.pensje.kwota--grupuje wg id i kwoty
-ORDER BY ksiegowosc.pensje.kwota; --sortuje wg kwoty
+WHERE ksiegowosc.wynagrodzenie.id_pensji = ksiegowosc.pensje.id_pensji 
+-- linking both tables using id_pensji (salary ID)
+GROUP BY ksiegowosc.wynagrodzenie.id_pracownika, ksiegowosc.pensje.kwota
+-- grouping by employee ID and salary amount
+ORDER BY ksiegowosc.pensje.kwota; -- sorting by salary
 
---2 SPOSOB 
-SELECT pr.id_pracownika, pr.imie,pr.nazwisko,pen.kwota
+-- SECOND METHOD
+SELECT pr.id_pracownika, pr.imie, pr.nazwisko, pen.kwota
 FROM ksiegowosc.pracownicy pr
-JOIN ksiegowosc.wynagrodzenie w ON pr.id_pracownika=w.id_pracownika
-JOIN ksiegowosc.pensje pen ON w.id_pensji=pen.id_pensji
-ORDER BY pen.kwota ASC; ---wynikki posortowan rosnaco
+JOIN ksiegowosc.wynagrodzenie w ON pr.id_pracownika = w.id_pracownika
+JOIN ksiegowosc.pensje pen ON w.id_pensji = pen.id_pensji
+ORDER BY pen.kwota ASC; -- sorting results in ascending order
 
---j.uszereguj pracownikow wg pensji i premii malejąco
+
+--Sort employees by salary and bonus in descending order
 SELECT
     ksiegowosc.pracownicy.imie, ksiegowosc.pracownicy.nazwisko,
-	SUM(ksiegowosc.pensje.kwota) + COALESCE(SUM(ksiegowosc.premie.kwota), 0) AS suma_wynagrodzenia --pensja plus premia
+    SUM(ksiegowosc.pensje.kwota) + COALESCE(SUM(ksiegowosc.premie.kwota), 0) AS total_salary -- salary plus bonus
 FROM ksiegowosc.pracownicy
 LEFT JOIN ksiegowosc.wynagrodzenie ON ksiegowosc.pracownicy.id_pracownika = ksiegowosc.wynagrodzenie.id_pracownika
 LEFT JOIN ksiegowosc.pensje ON ksiegowosc.wynagrodzenie.id_pensji = ksiegowosc.pensje.id_pensji
 LEFT JOIN ksiegowosc.premie ON ksiegowosc.wynagrodzenie.id_premii = ksiegowosc.premie.id_premii
---LAczenie tabelii na podstawie kluczy (bedzie wyswietlac nawet jak nie ma rekordow po praawej stronie-pensje/premie)
-GROUP BY  ksiegowosc.pracownicy.id_pracownika,ksiegowosc.pracownicy.imie, ksiegowosc.pracownicy.nazwisko
---grupuje wynik wg tego 
---oznacza, że wyniki będą agregowane dla każdego pracownika, umożliwiając obliczenia sumy wynagrodzenia dla każdego pracownika
+-- Joining tables based on keys (will display even if there are no records on the right side - salaries/bonuses)
+GROUP BY ksiegowosc.pracownicy.id_pracownika, ksiegowosc.pracownicy.imie, ksiegowosc.pracownicy.nazwisko
+-- Grouping results by employee (ensuring total salary is calculated for each employee)
 ORDER BY 
-    --COALESCE(SUM(ksiegowosc.pensje.kwota), 0) + COALESCE(SUM(ksiegowosc.premie.kwota), 0) DESC;
-	suma_wynagrodzenia DESC;
--- okresla porzadek sortowania -wg malejacej sumy wynagrodzen bo DESC
+    total_salary DESC;
+-- Defines sorting order - by descending total salary (highest to lowest)
 
-
---k.zlicz i pogrupuj pracownikow wg pola stanowisko
-SELECT stanowisko, COUNT(*) AS ilosc_pracownikow --zlicza i zapisuje pod nazwa ilosc_pracownikow
+-- Count and group employees by job title
+SELECT stanowisko, COUNT(*) AS employee_count -- counts and labels as employee_count
 FROM ksiegowosc.pensje
-GROUP BY stanowisko; --grupuje
+GROUP BY stanowisko; -- groups by job title
 
---l.policz srednia, min i max płace dla stanowiska kierownik (lub dowolne inne)
+
+-- Calculate average, minimum, and maximum salary for a given job title (e.g., 'Manager' or any other)
 SELECT 
-    AVG(kwota) AS srednia_placa,
-    MIN(kwota) AS minimalna_placa,
-    MAX(kwota) AS maksymalna_placa --zapisuje sr,min,max pod tymi nazwami
+    AVG(kwota) AS average_salary,
+    MIN(kwota) AS minimum_salary,
+    MAX(kwota) AS maximum_salary -- labels avg, min, max under these names
 FROM ksiegowosc.pensje
 WHERE stanowisko = 'Pracownik biuro';
 
---m.policz sume wynagrodzen
-SELECT SUM(ksiegowosc.pensje.kwota) + COALESCE(SUM(ksiegowosc.premie.kwota), 0)  AS suma_wynagrodzen --suma pensji i premi
-FROM  ksiegowosc.wynagrodzenie --glowna tabelka
-LEFT JOIN ksiegowosc.pensje ON ksiegowosc.wynagrodzenie.id_pensji=ksiegowosc.pensje.id_pensji
-LEFT JOIN ksiegowosc.premie ON ksiegowosc.wynagrodzenie.id_premii=ksiegowosc.premie.id_premii;
--- --polaczenie tabel pensji i premii z wynagrodzenie nawet jesli w pensji/premii nie było by rekordów zapisanych bo LEFT JOIN
+-- Calculate the total salaries paid
+SELECT SUM(ksiegowosc.pensje.kwota) + COALESCE(SUM(ksiegowosc.premie.kwota), 0) AS total_salaries -- total salary and bonuses
+FROM ksiegowosc.wynagrodzenie -- main table
+LEFT JOIN ksiegowosc.pensje ON ksiegowosc.wynagrodzenie.id_pensji = ksiegowosc.pensje.id_pensji
+LEFT JOIN ksiegowosc.premie ON ksiegowosc.wynagrodzenie.id_premii = ksiegowosc.premie.id_premii;
+-- joining salary and bonus tables with the salary payments table, 
+-- even if there are no corresponding records in the salary/bonus tables (LEFT JOIN ensures this)
 
---n.policz sume wynagrodzen w ramach 1 stanowiska
-SELECT ksiegowosc.pensje.stanowisko, SUM(ksiegowosc.pensje.kwota) + COALESCE(SUM(premie.kwota), 0) AS suma_wynagrodzen --bedzie wyswietalo stanowisko i sume jako suma_wynagrodzen
-FROM ksiegowosc.wynagrodzenie --glowna tabelka
-LEFT JOIN ksiegowosc.pensje ON ksiegowosc.wynagrodzenie.id_pensji=ksiegowosc.pensje.id_pensji
-LEFT JOIN ksiegowosc.premie ON ksiegowosc.wynagrodzenie.id_premii=ksiegowosc.premie.id_premii
---polaczenie tabel pensji i premii z wynagrodzenie nawet jesli w pesnji/premii nie było by rekordów zapisanych bo LEFT JOIN
-GROUP BY ksiegowosc.pensje.stanowisko; --grupuje te sumy przez stanowisko
+-- Calculate total salaries within each job title
+SELECT ksiegowosc.pensje.stanowisko, SUM(ksiegowosc.pensje.kwota) + COALESCE(SUM(premie.kwota), 0) AS total_salaries -- displays job title and total salaries
+FROM ksiegowosc.wynagrodzenie -- main table
+LEFT JOIN ksiegowosc.pensje ON ksiegowosc.wynagrodzenie.id_pensji = ksiegowosc.pensje.id_pensji
+LEFT JOIN ksiegowosc.premie ON ksiegowosc.wynagrodzenie.id_premii = ksiegowosc.premie.id_premii
+-- joining salary and bonus tables with salary payments, even if there are no corresponding records (LEFT JOIN ensures this)
+GROUP BY ksiegowosc.pensje.stanowisko; -- groups total salaries by job title
 
---o.wyznacz liczbe premi przyznanych dla prcownikow danego stanowiska
-SELECT ksiegowosc.pensje.stanowisko, COUNT(ksiegowosc.premie.id_premii) AS liczba_premii --wyznaczanie liczby premii as liczba_premii i stanowisko wyswietlenie
-FROM ksiegowosc.wynagrodzenie  --wskazujemy ze glowna tabela to wynagrodzenie
-JOIN ksiegowosc.premie  ON ksiegowosc.wynagrodzenie.id_premii = ksiegowosc.premie.id_premii --polacznie tabeli premie i wynagorodzenia przed id_premii
-JOIN ksiegowosc.pensje  ON ksiegowosc.wynagrodzenie.id_pensji=ksiegowosc.pensje.id_pensji --polaczenie tabeli pensje i wynagrodzenia poprzez id_pensji
-GROUP BY stanowisko; --grupowanie wg stanowiskam( czyli zliczy )
 
---p.usun pracownikow majacyhc pensje <1200
+-- Determine the number of bonuses awarded to employees in each job position
+SELECT ksiegowosc.pensje.stanowisko, COUNT(ksiegowosc.premie.id_premii) AS bonus_count -- calculates number of bonuses (AS bonus_count) and displays job position
+FROM ksiegowosc.wynagrodzenie  -- specifies that the main table is "wynagrodzenie" (salary payments)
+JOIN ksiegowosc.premie ON ksiegowosc.wynagrodzenie.id_premii = ksiegowosc.premie.id_premii -- joins the "premie" (bonuses) table with "wynagrodzenie" using id_premii
+JOIN ksiegowosc.pensje ON ksiegowosc.wynagrodzenie.id_pensji = ksiegowosc.pensje.id_pensji -- joins the "pensje" (salaries) table with "wynagrodzenie" using id_pensji
+GROUP BY stanowisko; -- groups results by job position (counts bonuses per position)
+
+--  Remove employees whose salary is less than 1200
 DELETE FROM ksiegowosc.pracownicy
 WHERE id_pracownika IN (
     SELECT ksiegowosc.pracownicy.id_pracownika
     FROM ksiegowosc.pracownicy 
-	JOIN ksiegowosc.wynagrodzenie ON ksiegowosc.pracownicy.id_pracownika=ksiegowosc.wynagrodzenie.id_pracownika 
-    JOIN ksiegowosc.pensje  ON ksiegowosc.wynagrodzenie.id_pensji = ksiegowosc.pensje.id_pensji
-WHERE ksiegowosc.pensje.kwota < 1200
+    JOIN ksiegowosc.wynagrodzenie ON ksiegowosc.pracownicy.id_pracownika = ksiegowosc.wynagrodzenie.id_pracownika 
+    JOIN ksiegowosc.pensje ON ksiegowosc.wynagrodzenie.id_pensji = ksiegowosc.pensje.id_pensji
+    WHERE ksiegowosc.pensje.kwota < 1200
 );
 
--- Aktualizacja tabeli "wynagrodzenie" w przypadku, gdy pracownik został usunięty z tabeli "pracownicy"
+-- Update the "wynagrodzenie" (salary payments) table if an employee was removed from the "pracownicy" (employees) table
 DELETE FROM ksiegowosc.wynagrodzenie
 WHERE id_pracownika NOT IN (
     SELECT id_pracownika
