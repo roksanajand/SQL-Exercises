@@ -17,46 +17,67 @@ CREATE INDEX id_territoryid ON sales.customer (territoryid);
 CREATE INDEX id_orderdate ON sales.salesorderheader (orderdate);
 
 
---zadanie 2
---a. Napisz zapytanie, które wykorzystuje transakcję (zaczyna ją), a następnie aktualizuje
---cenę produktu o ProductID równym 680 w tabeli Produc`on.Product o 10% i
---następnie zatwierdza transakcję.
+-- Task 2
 
-BEGIN TRANSACTION; --zaczęcie transakcji
+-- a. Write a query that starts a transaction, updates the price of the product with ProductID = 680 
+-- in the Production.Product table by increasing it by 10%, and then commits the transaction.
+
+BEGIN TRANSACTION; -- start transaction
 
 UPDATE production.product
-SET listprice = listprice + 0.1*listprice  -- zwieksza cenę o 10%
+SET listprice = listprice + 0.1 * listprice  -- increases price by 10%
 WHERE productid = 680;
 
-COMMIT TRANSACTION;
+COMMIT TRANSACTION; -- confirm transaction
 
----sprawdzenie czy się zwiększyło
+-- Verification: check if the price has increased
 SELECT *
 FROM production.product
 WHERE productid = 680;
 
---b Napisz zapytanie, które zaczyna transakcję, usuwa produkt o ProductID równym 707
---z tabeli Produc`on. Product, ale następnie wycofuje transakcję.
-BEGIN WORK;
+-- b. Write a query that starts a transaction, deletes the product with ProductID = 707
+-- from the Production.Product table, but then rolls back the transaction instead of committing it.
+
+BEGIN WORK; -- start transaction
 
 DELETE FROM production.product
-WHERE productid = 707; --usuniecie rekordu z id 707
+WHERE productid = 707; -- delete record with ProductID = 707
 
-ROLLBACK; --wycofaj transakcje zamiast jej potwierdzenia
+ROLLBACK; -- rollback transaction instead of confirming it
 
---c Napisz zapytanie, które zaczyna transakcję, dodaje nowy produkt do tabeli
-BEGIN TRANSACTION;
 
-INSERT INTO production.product (name, productnumber,makeflag,finishedgoodsflag,color,safetystocklevel,reorderpoint, standardcost, listprice,size,sizeunitmeasurecode,weightunitmeasurecode,weight,daystomanufacture,productline,class,style,productsubcategoryid,productmodelid,sellstartdate,sellenddate,discontinueddate,rowguid,modifieddate)
-VALUES ('Nowy Produkt', 'NP001', true,true,silver,100, 75.00,308,564,43,CM,LB,27,4,M,L,U,1,23,'2023-08-08', NULL, NULL, NEWID(), GETDATE());
---VALUES ('Nowy Produkt', 'NP001', 1, 1, 'silver', 100, 75.00, 308, 564, 43, 'CM', 'LB', 27, 4, 'M', 'L', 'U', 1, 23, '2023-08-08', NULL, NULL, NULL, NEWID(), GETDATE());
+-- c. Write a query that starts a transaction and adds a new product to the table
 
-COMMIT TRANSACTION;
+BEGIN TRANSACTION; -- start transaction
 
---c druga wersja 
-BEGIN TRANSACTION;
+INSERT INTO production.product (
+    name, productnumber, makeflag, finishedgoodsflag, color, safetystocklevel, reorderpoint, 
+    standardcost, listprice, size, sizeunitmeasurecode, weightunitmeasurecode, weight, 
+    daystomanufacture, productline, class, style, productsubcategoryid, productmodelid, 
+    sellstartdate, sellenddate, discontinueddate, rowguid, modifieddate
+)
+VALUES (
+    'Nowy Produkt', 'NP001', true, true, 'silver', 100, 75.00, 308, 564, 
+    43, 'CM', 'LB', 27, 4, 'M', 'L', 'U', 1, 23, 
+    '2023-08-08', NULL, NULL, NEWID(), GETDATE()
+);
 
-INSERT INTO Production.Product ( name, productnumber,makeflag,finishedgoodsflag,color,safetystocklevel,reorderpoint, standardcost, listprice,size,sizeunitmeasurecode,weightunitmeasurecode,weight,daystomanufacture,productline,class,style,productsubcategoryid,productmodelid,sellstartdate,sellenddate,discontinueddate,rowguid,modifieddate) --dodanie nowego rekordu
-VALUES ('Nowy Produkt', 'NP001', 1, 0, 'Czerwony', 10, 5, 10.00, 20.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, GETDATE(), NULL, NULL, NEWID(), GETDATE());
+COMMIT TRANSACTION; -- confirm transaction
 
-COMMIT TRANSACTION;
+
+-- Alternative version
+BEGIN TRANSACTION; -- start transaction
+
+INSERT INTO Production.Product (
+    name, productnumber, makeflag, finishedgoodsflag, color, safetystocklevel, reorderpoint, 
+    standardcost, listprice, size, sizeunitmeasurecode, weightunitmeasurecode, weight, 
+    daystomanufacture, productline, class, style, productsubcategoryid, productmodelid, 
+    sellstartdate, sellenddate, discontinueddate, rowguid, modifieddate
+) 
+VALUES (
+    'Nowy Produkt', 'NP001', 1, 0, 'Red', 10, 5, 10.00, 20.00, 
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+    GETDATE(), NULL, NULL, NEWID(), GETDATE()
+);
+
+COMMIT TRANSACTION; -- confirm transaction

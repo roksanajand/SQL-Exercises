@@ -1,19 +1,21 @@
---zadanie 1
---informacje na temat najwyższej stawki w historii płac pracownika oraz wyświetli jego podstawowe dane (imie,
---nazwisko, id), a następnie zapisze je do tabeli tymczasowej TempEmployeeInfo
+-- Task 1
+-- Retrieve information about the highest salary rate in an employee's salary history,
+-- display their basic details (first name, last name, ID),
+-- and then store the results in a temporary table TempEmployeeInfo.
+
 WITH EmployeeCTE AS (
-	SELECT
+    SELECT
         e.businessentityid,
         p.firstname,
         p.lastname,
-        MAX(e.rate) AS MaxRate --najwyższa stawka
+        MAX(e.rate) AS MaxRate -- highest salary rate
     FROM
         humanresources.employeepayhistory e
     JOIN
         person.person p ON e.businessentityid = p.businessentityid
     GROUP BY
         e.businessentityid, p.firstname, p.lastname
-	--grupowanie danych wg nazwiska, imienia i id, dzięki temu wyliczy max stawkę
+    -- grouping data by last name, first name, and ID to correctly calculate the maximum salary rate
 )
 SELECT
     businessentityid AS EmployeeID,
@@ -21,21 +23,21 @@ SELECT
     lastname,
     MaxRate
 INTO
---zapisywanie wyników do tymczasowej tabelki
+    -- storing results in a temporary table
     TempEmployeeInfo
 FROM
---dane pochodzą z wyrażenie CTE
+    -- data comes from the CTE expression
     EmployeeCTE;
 
---sprawdzenie
+-- verification
 SELECT *
-FROM TempEmployeeInfo
+FROM TempEmployeeInfo;
 
 
---zadanie 2
---Zbuduj zapytanie wykorzystujące wyrażenie CTE, które wyświetli ID klienta, ID terytorium na
---którym prowadzi działalność, a także wyświetli imię i nazwisko salesperson powiązanej z
---danym Customer.TerritoryID.
+-- Task 2
+-- Build a query using a CTE expression that displays the customer ID, 
+-- the territory ID where they operate, and the first and last name of the salesperson 
+-- associated with the given Customer.TerritoryID.
 WITH CustomerSalesCTE AS (
     SELECT
         sales.customer.customerid,

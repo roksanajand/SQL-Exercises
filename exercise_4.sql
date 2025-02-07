@@ -1,87 +1,92 @@
---zadanie1
+-- Task 1
 CREATE OR REPLACE FUNCTION generate_fibonacci(n INT)
-RETURNS TABLE (fib_value BIGINT) --funkcja zwróci table fib_value
+RETURNS TABLE (fib_value BIGINT) -- function returns a table with fib_value
 AS $$
-DECLARE --inicjalizacja zmiennych na początku
---zaczynamy ciąg od dwóch 1 
+DECLARE -- initialize variables at the beginning
+-- starting the sequence with two 1s
     a BIGINT := 1;
     b BIGINT := 1;
     i INT := 1;
 BEGIN
-    WHILE i <= n LOOP --pętla dopóki i bedzie <= n
+    WHILE i <= n LOOP -- loop while i is <= n
         fib_value := a;
         RETURN NEXT;
 
-		a := b; --przypisanie b do a, kolejnego do poprzedniego
-        b := a + fib_value; -- dodawanie 2 poprzednich
-        i := i + 1; --zwikeszmay i o 1 bo przechodizmy do kolejnego wyrazu
-    END LOOP; --kończy pętle
+        a := b; -- assign b to a, moving to the next number in the sequence
+        b := a + fib_value; -- sum of the two previous numbers
+        i := i + 1; -- increment i by 1 to move to the next term
+    END LOOP; -- end of the loop
 END;
 $$ LANGUAGE plpgsql;
---wywołanie procedury 
-SELECT * FROM generate_fibonacci(10); --wywołanie fibonnaciego dla 10 wyrazów
+
+-- Calling the function
+SELECT * FROM generate_fibonacci(10); -- generating Fibonacci sequence for 10 terms
 
 
 
---za pomocą procedury
+-- Using a procedure to print Fibonacci numbers
 CREATE OR REPLACE PROCEDURE print_fib(n INT)
 LANGUAGE plpgsql
 AS $$ 
 DECLARE
-counter INT :=1;
-fib_number BIGINT;
+    counter INT := 1;
+    fib_number BIGINT;
 BEGIN
-WHILE counter<=n LOOP
-fib_number:=generate_fibonacci(counter);
-RAISE NOTICE 'Fib numver %: %',counter,fib_number;
-counter:=counter+!;
-END LOOP;
-END
-$$
---zadanie2
+    WHILE counter <= n LOOP
+        fib_number := (SELECT fib_value FROM generate_fibonacci(counter) LIMIT 1);
+        RAISE NOTICE 'Fib number %: %', counter, fib_number;
+        counter := counter + 1; 
+    END LOOP;
+END;
+$$;
 
+-- Task 2
+
+-- Function to convert last names to uppercase before inserting/updating a record
 CREATE OR REPLACE FUNCTION uppercase_lastname()
 RETURNS TRIGGER AS $$
 BEGIN
-  NEW.lastname := UPPER(NEW.lastname); --zmiana nowo wstawionegop nazwiska na nazwisko dużymi literami
-  RETURN NEW; --zwraca zmodyfikoway rekord
-  --NEW zawiera wartość nowego rekordu
+  NEW.lastname := UPPER(NEW.lastname); -- convert the new last name to uppercase
+  RETURN NEW; -- return the modified record
+  -- NEW contains the values of the new record
 END;
 $$ LANGUAGE plpgsql;
 
+-- Trigger that executes the function before inserting or updating a record
 CREATE TRIGGER uppercase_lastname_trigger
 BEFORE INSERT OR UPDATE ON person.person
-FOR EACH ROW --trigger jest wyzwalany dla każdego wstawionego lub aktualizowanego rekordu 
-EXECUTE FUNCTION uppercase_lastname(); --wtedy wywołuje funkcje zmieniajaca litery na duże
+FOR EACH ROW -- the trigger is fired for each inserted or updated record
+EXECUTE FUNCTION uppercase_lastname(); -- calls the function to convert last names to uppercase
 
 
---zadanie3
---Przygotuj trigger ‘taxRateMonitoring’, który wyświetli komunikat o błędzie, jeżeli nastąpi zmiana wartości w polu ‘TaxRate’ o więcej niż 30%.
+-- Task 3
+-- Create a trigger ‘taxRateMonitoring’ that displays an error message 
+-- if the value in the ‘TaxRate’ field changes by more than 30%.
 
 CREATE OR REPLACE FUNCTION CheckTaxChange() RETURNS TRIGGER AS $$
 DECLARE
---deklaracja nowych zmiennych
+    -- Declare new variables
     oldTaxRate DECIMAL(18,2);
     newTaxRate DECIMAL(18,2);
     percentageChange DECIMAL(5,2);
 BEGIN
-    oldTaxRate := OLD.TaxRate; --stara wartość TaxRate
-    newTaxRate := NEW.TaxRate; --nowa wartość
+    oldTaxRate := OLD.TaxRate; -- old TaxRate value
+    newTaxRate := NEW.TaxRate; -- new TaxRate value
 
-    --procentową zmianę 
+    -- Calculate percentage change
     percentageChange := ABS((newTaxRate - oldTaxRate) / oldTaxRate) * 100;
 
-    -- wyświetlić  komunikat o błędzie jesli >30%
+    -- Display an error message if the change exceeds 30%
     IF percentageChange > 30 THEN
-        RAISE EXCEPTION 'Zmiana wartości pola TaxRate przekracza 30%%'; -- trzeba %% bo sam % traktuje jak znak specjalny
+        RAISE EXCEPTION 'Change in TaxRate exceeds 30%%'; -- %% is needed because % is treated as a special character
     END IF;
 
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
---przypisanie funkcji do triggera
+-- Assign the function to a trigger
 CREATE TRIGGER taxRateMonitoring
 BEFORE UPDATE ON sales.salestaxrate
-FOR EACH ROW --dla każdego wiersza
+FOR EACH ROW -- triggers for each row
 EXECUTE FUNCTION CheckTaxChange();
